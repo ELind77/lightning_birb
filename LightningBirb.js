@@ -59,7 +59,6 @@ function World(canvas, ctx) {
     var that = this;
 
     // INIT
-
     this.init = function init() {
         this.bird = new Bird(this.canvas, this.ctx);
         this.bird.init();
@@ -112,7 +111,7 @@ function World(canvas, ctx) {
         // Stop ticking
         clearInterval(this.ticker);
         // Clear listeners
-        document.removeEventListener("keyup", this.checkKeys);
+        document.removeEventListener('keyup', this.checkKeys);
         // Show game over
         writeGG(this.ctx, this.canvas);
         // Draw replay
@@ -125,7 +124,6 @@ function World(canvas, ctx) {
     function writeGG(ctx, canvas) {
         ctx.save();
         var text = 'GAME OVER';
-        //var txtWidth = ctx.measureText(text), txtHeight = 50;
         var center = [canvas.width/2, canvas.height/2];
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -254,7 +252,7 @@ function Bird(canvas, ctx) {
             "left" : {posn: 0, val: -10},
             "right" : {posn: 0, val: 10}
         };
-        var dir = directions[direction]
+        var dir = directions[direction];
 
         this.clear();
         this.posn[dir.posn] += dir.val;
@@ -262,9 +260,9 @@ function Bird(canvas, ctx) {
     };
 
     this.collide = function collide(posn) {
-        var x = this.posn[0], y = this.posn[1];
-        return posn[0] < x + this.width && posn[0] > x &&
-            posn[1]  > y && posn[1] < y + this.height;
+        var x = this.posn[0] - this.width/2, y = this.posn[1] - this.height/2;
+        return posn[0] > x && posn[0] < x + this.width &&
+               posn[1] > y && posn[1] < y + this.height;
     };
 
     //
