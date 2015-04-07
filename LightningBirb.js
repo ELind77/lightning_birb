@@ -11,6 +11,7 @@
 //        - Clouds?
 //        - Game Over asset
 //    - Functionality
+//        - Prevent birb from running off canvas
 //        - Levels
 //        - Lives?
 //        - Better lightning?
@@ -253,10 +254,17 @@ function Bird(canvas, ctx) {
             "right" : {posn: 0, val: 10}
         };
         var dir = directions[direction];
+        var newPosn = this.posn.slice();
+        newPosn[dir.posn] += dir.val;
+        var newX = newPosn[0], newY = newPosn[1];
 
-        this.clear();
-        this.posn[dir.posn] += dir.val;
-        this.draw();
+        // Check canvas edges
+        if (newX >= this.width/2 && newX <= this.canvas.width - this.width/2 &&
+            newY >= this.height/2 && newY <= this.canvas.height - this.height/2) {
+            this.clear();
+            this.posn = newPosn;
+            this.draw();
+        }
     };
 
     this.collide = function collide(posn) {
@@ -281,10 +289,7 @@ function Bird(canvas, ctx) {
         img.src = url;
         return img;
     }
-
 }
-
-
 
 
 // LIGHTNING
@@ -351,7 +356,7 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
         ctx.moveTo(posn1[0], posn1[1]);
         ctx.lineTo(posn2[0], posn2[1]);
         ctx.lineWidth = 4;
-        ctx.strokeStyle = '#f7da36';
+        ctx.strokeStyle = '#f7da36'; // Lightning yellow
         ctx.shadowColor = '#999';
         ctx.shadowBlur = 3;
         ctx.shadowOffsetX = 1;
