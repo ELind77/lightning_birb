@@ -17,7 +17,8 @@
 //            - Random chance to change direction?
 //            - Moves faster?
 //            - overlapping time?
-//                - So you can't jsut move to the top and be safe
+//                - So you can't just move to the top and be safe
+//        - Prevent Birb from overlapping lighting?
 //    - Code
 //         - requestanimationframe // Make things smoother
 //                - Will also require reworking lightning
@@ -224,7 +225,6 @@ function Bird(canvas, ctx) {
 
     this.init = function birdInit() {
         this.loadSprite();
-        //this.draw();
     };
 
     this.draw = function drawBird() {
@@ -292,23 +292,26 @@ function Bird(canvas, ctx) {
 function Lightning(canvas, baseLen, startX, boundsWidth) {
     // Properties
     //var baseLen = baseLen;
-    var height = canvas.height, width = canvas.width;
+    var height = canvas.height;//, width = canvas.width;
     //var startX = this.getStartX(boundsWidth);
     this.ctx = canvas.getContext('2d');
     this.leftBound = startX - boundsWidth/2;
     this.rightBound = startX + boundsWidth/2;
     this.startPosn = [startX, 0];
     this.currPosn = this.startPosn;
+    this.theta = Math.PI/2;
+    this.chanceToChange = 0;
+    this.changeThreshold = 0.5;
     this.done = null;
     this.count = 0;
-    this.times = 100;
+    //this.times = 100;
 
     this.tick = function tick() {
         console.log("lighting!", this);
         if (this.currPosn[1] >= height) {
             this.done = true;
         } else {
-            var newPosn = getNewPosn(this.currPosn);
+            var newPosn = this.getNewPosn(this.currPosn);
             while (!checkBounds(newPosn, this.leftBound, this.rightBound)) {
                 if (this.count < 100) {
                     this.count ++;
@@ -326,14 +329,21 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
     //
     // Helpers
     //
-    function getNewPosn(currPosn) {
+    this.getNewPosn = function getNewPosn(currPosn) {
         var rand = Math.random();
-        var theta = rand * Math.PI;
+        //// Update chance
+        //this.chanceToChange += rand * 0.5;
+        //// Check chance
+        //if (this.chanceToChange > this.changeThreshold) {
+        //    this.theta = rand * Math.PI;
+        //    this.chanceToChange = 0;
+        //}
+        this.theta = rand * Math.PI;
         var newLen = rand * baseLen;
-        var newX = currPosn[0] + newLen * Math.cos(theta);
-        var newY = currPosn[1] + newLen * Math.sin(theta);
+        var newX = currPosn[0] + newLen * Math.cos(this.theta);
+        var newY = currPosn[1] + newLen * Math.sin(this.theta);
         return [newX, newY];
-    }
+    };
 
     function drawLine(ctx, posn1, posn2) {
         ctx.save();
