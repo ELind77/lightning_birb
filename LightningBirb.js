@@ -56,7 +56,7 @@ function World(canvas, ctx) {
     this.lightningBoundsWidth = 150;
     this.lightning = null;
     this.lightningChance = 0;
-    // New lightning roughly every 5 seconds (50 ticks)
+    // New lightning roughly every 2.5 seconds (50 ticks)
     this.lightningThreshold = 25;
     this.flashing = false;
     this.count = 0;
@@ -81,7 +81,7 @@ function World(canvas, ctx) {
     // RUN
     this.run = function run() {
         //var that = this;
-        this.ticker = setInterval(function() {that.tick.call(that);  }, 100);
+        this.ticker = setInterval(function() {that.tick.call(that);  }, 50);
     };
 
     // TICK
