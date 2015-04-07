@@ -12,17 +12,25 @@
 //        - Game Over asset
 //    - Functionality
 //        - Prevent birb from running off canvas (done)
+//        - Prevent Birb from overlapping lighting?
 //        - Levels
 //        - Lives (done)
 //        - Better lightning?
-//            - Random chance to change direction?
+//            - Random chance to change direction? (tried)
 //            - Moves faster?
 //            - overlapping time?
 //                - So you can't just move to the top and be safe
-//        - Prevent Birb from overlapping lighting?
 //    - Code
 //         - requestanimationframe // Make things smoother
 //                - Will also require reworking lightning
+
+// In order to implement levels I think I'm going to needto use multiple
+// canvases.  The flash will need to be a separate canvas on top.  And each
+// lightning will need to be on it's own canvas so that they can be cleared
+// independently.  I think that the architecture I have will actually work
+// ok for this as I can just iterate over an array of Lightning.  The biggest
+// change will be in clearWorld which will need to remove the extra DOM
+// elements and manage multiple canvases.
 
 
 window.onload = runIt;
@@ -117,6 +125,7 @@ function World(canvas, ctx) {
     // Clear World
     this.clearWorld = function clearWorld() {
         this.ctx.clearRect(0, 0, this.canvas.width, canvas.height);
+        //this.ctx.fillRect(0, 0, this.width, this.height);
         this.bird.draw();
         this.drawLives();
     };
