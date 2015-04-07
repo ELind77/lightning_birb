@@ -20,14 +20,15 @@
 //                - So you can't jsut move to the top and be safe
 
 
-window.onload = function() {
-    var canvas = document.getElementById('can');
-    //var ctx = canvas.getContext('2d');
+window.onload = runIt;
 
+function runIt() {
+    var canvas = document.getElementById('can');
     var world = new World(canvas);
+    
     world.init();
     world.run();
-};
+}
 
 // WORLD
 ///////////////////////////////////
@@ -38,7 +39,8 @@ function World(canvas) {
     this.lightningBoundsWidth = 150;
     this.lightning = null;
     this.lightningChance = 0;
-    this.lightningThreshold = 0.5;
+    // New lightning roughly every 5 seconds (50 ticks)
+    this.lightningThreshold = 25;
     this.flashing = false;
     this.count = 0;
     this.bird = null;
@@ -49,7 +51,7 @@ function World(canvas) {
     this.init = function init() {
         this.bird = new Bird(this.canvas, this.ctx);
         this.bird.init();
-        document.addEventListener("keyup", this.checkKeys);
+        document.addEventListener('keyup', this.checkKeys);
     };
 
 
@@ -64,9 +66,8 @@ function World(canvas) {
                 // Check for collision with bird
                 if (this.bird.collide(this.lightning.currPosn)) {
                     this.gameOver();
-                }
                 // Check for lightning and draw it if needed
-                if (this.lightning.done) {
+                } else if (this.lightning.done) {
                     this.lightning = null;
                     this.lightningChance = 0;
                     this.clearWorld();
@@ -76,7 +77,7 @@ function World(canvas) {
             } else {
                 var rand = Math.random();
                 // Update chance
-                this.lightningChance += rand/50;
+                this.lightningChance += rand;
                 // Check chance
                 if (this.lightningChance >= this.lightningThreshold) {
                 //if (rand > this.lightningThreshold) {
@@ -99,34 +100,57 @@ function World(canvas) {
         clearInterval(this.ticker);
         // Clear listeners
         document.removeEventListener("keyup", this.checkKeys);
-        // Load game over
-        var url = 'http://blog.check-and-secure.com/wp-content/uploads/2014/06/gameover.jpg';
-        var img = new Image();
-        img.onload = function() {
-            that.ctx.drawImage(img, 0, 0, that.canvas.width, that.canvas.height);
-        };
-        img.src = url;
+        // Show game over
+        writeGG(this.ctx, this.canvas);
         // Draw replay
-        //drawReplay(this.ctx, this.canvas);
+        drawReplay(this.ctx, this.canvas);
         // Add listeners to replay
+        this.canvas.onmousedown = function() {
+            runIt();
+        };
     };
+
+    function writeGG(ctx, canvas) {
+        ctx.save();
+        var text = 'GAME OVER';
+        //var txtWidth = ctx.measureText(text), txtHeight = 50;
+        var center = [canvas.width/2, canvas.height/2];
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'red';
+        ctx.font = '50pt Arial';
+        ctx.textAlign ='center';
+        ctx.translate(center[0], center[1]);
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+    }
 
 
     //
     // Helpers
     //
     function drawReplay(ctx, canvas) {
+        console.log("Play again");
         var text = 'Play Again?';
-        var txtWidth = ctx.measureText(text), txtHeight = 25;
+        var txtWidth = ctx.measureText(text).width, txtHeight = 20;
         var center = [canvas.width/2, canvas.height/2];
+        var offset = 10;
+        // Text
         ctx.save();
         ctx.fillStyle = 'white';
         ctx.font = '20px Arial';
+        ctx.textAlign ='center';
         ctx.translate(center[0], center[1]);
-        ctx.fillText('Play again?', txtWidth/-2, txtHeight/-2);
-        ctx.translate(center[0], center[1]);
-        //ctx.rect(txtWidth/-2, txtHeight, txtWidth, txtHeight*2)
-
+        ctx.fillText('Play again?', 0, 75);
+        ctx.restore();
+        // Rectangle
+        //ctx.save();
+        //ctx.strokeStyle = 'white';
+        //ctx.lineWidth = 5;
+        //ctx.translate(center[0], center[1]);
+        //ctx.rect(txtWidth/-2, (txtHeight + offset)/2, txtWidth, (txtHeight + offset)*2);
+        //ctx.stroke();
+        //ctx.restore();
     }
 
     this.clearWorld = function clearWorld() {
@@ -148,8 +172,6 @@ function World(canvas) {
     };
 
     this.getStartX = function getStartX() {
-        //var rand = Math.random();
-        //return 150;
         var rand, x;
         do {
             rand = Math.random();
@@ -262,6 +284,7 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
     //var baseLen = baseLen;
     var height = canvas.height, width = canvas.width;
     //var startX = this.getStartX(boundsWidth);
+    this.ctx = canvas.getContext('2d');
     this.leftBound = startX - boundsWidth/2;
     this.rightBound = startX + boundsWidth/2;
     this.startPosn = [startX, 0];
@@ -285,7 +308,7 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
                 }
             }
             this.count = 0;
-            drawLine(ctx, this.currPosn, newPosn);
+            drawLine(this.ctx, this.currPosn, newPosn);
             this.currPosn = newPosn;
         }
     };
