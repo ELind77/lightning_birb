@@ -48,6 +48,8 @@ function runIt() {
 ///////////////////////////////////
 function World(canvas, ctx) {
     this.canvas = canvas;
+    this.width = canvas.width;
+    this.height = canvas.height;
     this.ctx = ctx;
     this.ticker = null;
     this.lightningBoundsWidth = 150;
@@ -158,17 +160,17 @@ function World(canvas, ctx) {
     // LIVES
     //
     this.drawLives = function drawLives() {
-        var livesSize = 10;
+        var livesSize = 20;
         var margin = 5;
 
         function drawLife(num) {
             var x = (livesSize + margin) * num;
             var y = livesSize + margin;
-            that.ctx.translate(x, y);
-            that.ctx.drawImage(that.bird.img, x, y, livesSize, livesSize);
+            that.ctx.translate(that.width, that.height);
+            that.ctx.drawImage(that.bird.img, -x, -y, livesSize, livesSize);
         }
 
-        for(var i = 0; i < this.lives; i++) {
+        for(var i = 1; i <= this.lives; i++) {
             this.ctx.save();
             drawLife(i);
             this.ctx.restore();
