@@ -20,13 +20,14 @@
 //                - So you can't jsut move to the top and be safe
 
 
+window.onload = function() {
+    var canvas = document.getElementById('can');
+    //var ctx = canvas.getContext('2d');
 
-var canvas = document.getElementById('can');
-var ctx = canvas.getContext('2d');
-
-world = new World(canvas);
-world.init();
-world.run();
+    var world = new World(canvas);
+    world.init();
+    world.run();
+};
 
 // WORLD
 ///////////////////////////////////
@@ -35,7 +36,7 @@ function World(canvas) {
     this.ctx = canvas.getContext('2d');
     this.ticker = null;
     this.lightningBoundsWidth = 150;
-    this.lightning;
+    this.lightning = null;
     this.lightningChance = 0;
     this.lightningThreshold = 0.5;
     this.flashing = false;
@@ -49,7 +50,7 @@ function World(canvas) {
         this.bird = new Bird(this.canvas, this.ctx);
         this.bird.init();
         document.addEventListener("keyup", this.checkKeys);
-    }
+    };
 
 
     // TICK
@@ -84,13 +85,13 @@ function World(canvas) {
                 }
             }
         }
-    }
+    };
 
     // RUN
     this.run = function run() {
         var that = this;
         this.ticker = setInterval(function() {that.tick.call(that);  }, 100);
-    }
+    };
 
     // GG
     this.gameOver = function gameOver() {
@@ -103,12 +104,12 @@ function World(canvas) {
         var img = new Image();
         img.onload = function() {
             that.ctx.drawImage(img, 0, 0, that.canvas.width, that.canvas.height);
-        }
+        };
         img.src = url;
         // Draw replay
         //drawReplay(this.ctx, this.canvas);
         // Add listeners to replay
-    }
+    };
 
 
     //
@@ -129,9 +130,9 @@ function World(canvas) {
     }
 
     this.clearWorld = function clearWorld() {
-        this.ctx.clearRect(0,0,this.canvas.width,canvas.height);
+        this.ctx.clearRect(0, 0, this.canvas.width, canvas.height);
         this.bird.draw();
-    }
+    };
 
     this.flash = function flash(ctx, canvas) {
         if (this.flashing) {
@@ -144,7 +145,7 @@ function World(canvas) {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.restore();
         }
-    }
+    };
 
     this.getStartX = function getStartX() {
         //var rand = Math.random();
@@ -157,7 +158,7 @@ function World(canvas) {
                 return x;
             }
         } while (true);
-    }
+    };
 
     this.checkKeys = function checkKeys(e) {
         switch(e.which) {
@@ -192,7 +193,7 @@ function Bird(canvas, ctx) {
     this.init = function birdInit() {
         this.loadSprite();
         //this.draw();
-    }
+    };
 
     this.draw = function drawBird() {
         this.ctx.save();
@@ -201,7 +202,7 @@ function Bird(canvas, ctx) {
         //this.ctx.fillRect(this.width/-2, this.width/-2, this.width, this.height);
         this.ctx.drawImage(this.img, this.width/-2, this.width/-2, this.width, this.height);
         this.ctx.restore();
-    }
+    };
 
     this.clear = function clearBird() {
         this.ctx.save();
@@ -210,7 +211,7 @@ function Bird(canvas, ctx) {
         this.ctx.clearRect(this.width/-2, this.width/-2, this.width, this.height);
         //this.ctx.fillRect(this.width/-2, this.width/-2, this.width, this.height);
         this.ctx.restore();
-    }
+    };
 
     this.move = function moveBird(direction) {
         var directions = {
@@ -224,13 +225,13 @@ function Bird(canvas, ctx) {
         this.clear();
         this.posn[dir.posn] += dir.val;
         this.draw();
-    }
+    };
 
     this.collide = function collide(posn) {
         var x = this.posn[0], y = this.posn[1];
         return posn[0] < x + this.width && posn[0] > x &&
             posn[1]  > y && posn[1] < y + this.height;
-    }
+    };
 
     //
     // Helpers
@@ -258,7 +259,7 @@ function Bird(canvas, ctx) {
 ///////////////////////////////////
 function Lightning(canvas, baseLen, startX, boundsWidth) {
     // Properties
-    var baseLen = baseLen;
+    //var baseLen = baseLen;
     var height = canvas.height, width = canvas.width;
     //var startX = this.getStartX(boundsWidth);
     this.leftBound = startX - boundsWidth/2;
@@ -287,7 +288,7 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
             drawLine(ctx, this.currPosn, newPosn);
             this.currPosn = newPosn;
         }
-    }
+    };
 
     //
     // Helpers
