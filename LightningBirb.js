@@ -6,12 +6,17 @@
 // TODO:
 //    - Assets
 //        - Birb asset
-//        - Ground asset? (maybe not necessary?)
-//        - Background asset
-//        - Clouds
-//        - Game Over asset
+//        - Background
+//            - Clouds
+//        - Better fonts?
+//        - Game Over Screen
+//        - Loading Splash
+//        - End of level splash/animation
+//        - Favicon
 //    - Functionality
 //        - Prevent birb from running off canvas (done)
+//        - Help text (h)
+//        - Pause (p)
 //        - Prevent Birb from overlapping lighting?
 //        - Levels
 //        - Lives (done)
@@ -52,6 +57,7 @@ function World(canvas, ctx) {
     this.width = canvas.width;
     this.height = canvas.height;
     this.ctx = ctx;
+    this.tickRate = 50;
     this.ticker = null;
     this.lightningBoundsWidth = 150;
     this.lightning = null;
@@ -81,7 +87,7 @@ function World(canvas, ctx) {
     // RUN
     this.run = function run() {
         //var that = this;
-        this.ticker = setInterval(function() {that.tick.call(that);  }, 50);
+        this.ticker = setInterval(function() {that.tick.call(that);  }, that.tickRate);
     };
 
     // TICK
@@ -128,6 +134,7 @@ function World(canvas, ctx) {
         //this.ctx.fillRect(0, 0, this.width, this.height);
         this.bird.draw();
         this.drawLives();
+        this.drawLevel();
     };
 
     this.restart = function reset() {
@@ -194,6 +201,17 @@ function World(canvas, ctx) {
         }
     };
 
+    this.drawLevel = function drawLevel() {
+        var x = 10;
+        var y = this.height - (15);
+        this.ctx.save();
+        this.ctx.font = '15px Arial';
+        this.ctx.fillStyle = '#78C2FF';
+        this.ctx.translate(x, y);
+        this.ctx.fillText('Level '+this.level, 0, 0);
+        this.ctx.restore();
+    };
+
 
     //
     // Helpers
@@ -204,6 +222,7 @@ function World(canvas, ctx) {
         // Clear listeners
         document.removeEventListener('keyup', this.checkKeys);
     };
+
 
     function writeGG(ctx, canvas) {
         ctx.save();
