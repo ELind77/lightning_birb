@@ -6,14 +6,14 @@
 // TODO:
 //    - Assets
 //        - Birb asset
-//        - Ground asset
+//        - Ground asset? (maybe not necessary?)
 //        - Background asset
-//        - Clouds?
+//        - Clouds
 //        - Game Over asset
 //    - Functionality
 //        - Prevent birb from running off canvas (done)
 //        - Levels
-//        - Lives?
+//        - Lives (done)
 //        - Better lightning?
 //            - Random chance to change direction?
 //            - Moves faster?
@@ -31,13 +31,6 @@ function runIt() {
     var canvas = document.getElementById('can');
     var ctx = canvas.getContext('2d');
     var world = new World(canvas, ctx);
-
-    // Remove css
-    canvas.className = '';
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Remove listeners
-    canvas.removeEventListener('mousedown', runIt);
 
     // Run IT!
     world.init();
@@ -61,6 +54,7 @@ function World(canvas, ctx) {
     this.count = 0;
     this.bird = null;
     this.lives = 3;
+    this.level = 1;
     var that = this;
 
     // INIT
@@ -86,7 +80,7 @@ function World(canvas, ctx) {
     this.tick = function tick() {
         if (this.count < 10000) {
             this.count ++;
-            console.log("tick!", this, this.lightning, this.lightningChance);
+            //console.log("tick!", this, this.lightning, this.lightningChance);
             if (this.flashing) {
                 this.flash();
             } else if (this.lightning) {
@@ -94,7 +88,7 @@ function World(canvas, ctx) {
                 if (this.bird.collide(this.lightning.currPosn)) {
                     if (this.lives >= 1) {
                         this.lives -= 1;
-                        this.reset();
+                        this.restart();
                     } else {
                         this.gameOver();
                     }
@@ -127,11 +121,11 @@ function World(canvas, ctx) {
         this.drawLives();
     };
 
-    this.reset = function reset() {
-        console.log("Reset!");
+    this.restart = function reset() {
+        console.log("Restart!");
         // Remove Listeners and ticker
         this.stopEverything();
-        function restart() {
+        function restartHelper() {
             that.flashing = false;
             that.ticker = null;
             that.lightning = null;
@@ -140,7 +134,21 @@ function World(canvas, ctx) {
             that.clearWorld();
             that.run();
         }
-        setTimeout(restart, 500);
+        setTimeout(restartHelper, 500);
+    };
+
+    this.reset = function reset() {
+        // Reset game persistent world properties
+        that.lives = 3;
+        that.level = 1;
+        // Remove css
+        that.canvas.className = '';
+        // Clear the canvas
+        that.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Remove listeners
+        that.canvas.removeEventListener('mousedown', that.reset);
+        // Play again
+        that.restart();
     };
 
     // GG
@@ -153,7 +161,7 @@ function World(canvas, ctx) {
         drawReplay(this.ctx, this.canvas);
         // Add listeners to replay
         this.canvas.className += "over";
-        this.canvas.addEventListener('mousedown', runIt);
+        this.canvas.addEventListener('mousedown', that.reset);
     };
 
     //
@@ -176,10 +184,6 @@ function World(canvas, ctx) {
             this.ctx.restore();
         }
     };
-
-    //this.initBird = function initBird() {
-    //
-    //}
 
 
     //
@@ -373,7 +377,7 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
     //this.times = 100;
 
     this.tick = function tick() {
-        console.log("lighting!", this);
+        //console.log("lighting!", this);
         if (this.currPosn[1] >= height) {
             this.done = true;
         } else {
@@ -381,7 +385,7 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
             while (!checkBounds(newPosn, this.leftBound, this.rightBound)) {
                 if (this.count < 100) {
                     this.count ++;
-                    console.log("trying new posn");
+                    //console.log("trying new posn");
                     //newPosn = getNewPosn(currPosn);
                     newPosn = boundsAdjust(newPosn, this.leftBound, this.rightBound);
                 }
