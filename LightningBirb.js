@@ -11,7 +11,7 @@
 //        - Clouds?
 //        - Game Over asset
 //    - Functionality
-//        - Prevent birb from running off canvas
+//        - Prevent birb from running off canvas (done)
 //        - Levels
 //        - Lives?
 //        - Better lightning?
@@ -58,16 +58,27 @@ function World(canvas, ctx) {
     this.flashing = false;
     this.count = 0;
     this.bird = null;
+    this.lives = 3;
     var that = this;
 
     // INIT
     this.init = function init() {
         this.bird = new Bird(this.canvas, this.ctx);
-        this.bird.init();
-
+        var promise = new Promise(function(resolve, reject) {
+            that.bird.init(resolve, reject);
+        });
+        promise.then(function(resolved) {
+            that.clearWorld();
+        });
+        //this.clearWorld();
         document.addEventListener('keyup', this.checkKeys);
     };
 
+    // RUN
+    this.run = function run() {
+        //var that = this;
+        this.ticker = setInterval(function() {that.tick.call(that);  }, 100);
+    };
 
     // TICK
     this.tick = function tick() {
@@ -79,7 +90,12 @@ function World(canvas, ctx) {
             } else if (this.lightning) {
                 // Check for collision with bird
                 if (this.bird.collide(this.lightning.currPosn)) {
-                    this.gameOver();
+                    if (this.lives >= 1) {
+                        this.lives -= 1;
+                        this.reset();
+                    } else {
+                        this.gameOver();
+                    }
                 // Check for lightning and draw it if needed
                 } else if (this.lightning.done) {
                     this.lightning = null;
@@ -102,18 +118,33 @@ function World(canvas, ctx) {
         }
     };
 
-    // RUN
-    this.run = function run() {
-        var that = this;
-        this.ticker = setInterval(function() {that.tick.call(that);  }, 100);
+    // Clear World
+    this.clearWorld = function clearWorld() {
+        this.ctx.clearRect(0, 0, this.canvas.width, canvas.height);
+        this.bird.draw();
+        this.drawLives();
+    };
+
+    this.reset = function reset() {
+        console.log("Reset!");
+        // Remove Listeners and ticker
+        this.stopEverything();
+        function restart() {
+            that.flashing = false;
+            that.ticker = null;
+            that.lightning = null;
+            that.lightningChance = 0;
+            document.addEventListener('keyup', that.checkKeys);
+            that.clearWorld();
+            that.run();
+        }
+        setTimeout(restart, 500);
     };
 
     // GG
     this.gameOver = function gameOver() {
-        // Stop ticking
-        clearInterval(this.ticker);
-        // Clear listeners
-        document.removeEventListener('keyup', this.checkKeys);
+        // Remove Liseners and ticker
+        this.stopEverything();
         // Show game over
         writeGG(this.ctx, this.canvas);
         // Draw replay
@@ -121,6 +152,42 @@ function World(canvas, ctx) {
         // Add listeners to replay
         this.canvas.className += "over";
         this.canvas.addEventListener('mousedown', runIt);
+    };
+
+    //
+    // LIVES
+    //
+    this.drawLives = function drawLives() {
+        var livesSize = 10;
+        var margin = 5;
+
+        function drawLife(num) {
+            var x = (livesSize + margin) * num;
+            var y = livesSize + margin;
+            that.ctx.translate(x, y);
+            that.ctx.drawImage(that.bird.img, x, y, livesSize, livesSize);
+        }
+
+        for(var i = 0; i < this.lives; i++) {
+            this.ctx.save();
+            drawLife(i);
+            this.ctx.restore();
+        }
+    };
+
+    //this.initBird = function initBird() {
+    //
+    //}
+
+
+    //
+    // Helpers
+    //
+    this.stopEverything = function stopEverything() {
+        // Stop ticking
+        clearInterval(this.ticker);
+        // Clear listeners
+        document.removeEventListener('keyup', this.checkKeys);
     };
 
     function writeGG(ctx, canvas) {
@@ -137,10 +204,6 @@ function World(canvas, ctx) {
         ctx.restore();
     }
 
-
-    //
-    // Helpers
-    //
     function drawReplay(ctx, canvas) {
         console.log("Play again");
         var text = 'Play Again?';
@@ -164,11 +227,6 @@ function World(canvas, ctx) {
         //ctx.stroke();
         //ctx.restore();
     }
-
-    this.clearWorld = function clearWorld() {
-        this.ctx.clearRect(0, 0, this.canvas.width, canvas.height);
-        this.bird.draw();
-    };
 
     this.flash = function flash(ctx, canvas) {
         if (this.flashing) {
@@ -210,7 +268,6 @@ function World(canvas, ctx) {
                 break;
         }
     }
-
 }
 
 
@@ -224,8 +281,8 @@ function Bird(canvas, ctx) {
     this.height = 50;
     this.img = null;
 
-    this.init = function birdInit() {
-        this.loadSprite();
+    this.init = function birdInit(resolve, reject) {
+        this.loadSprite(resolve, reject);
     };
 
     this.draw = function drawBird() {
@@ -276,7 +333,7 @@ function Bird(canvas, ctx) {
     //
     // Helpers
     //
-    this.loadSprite = function loadSprite() {
+    this.loadSprite = function loadSprite(resolve, reject) {
         var that = this;
         var url = 'http://sweetclipart.com/multisite/sweetclipart/files/imagecache/middle/chick_baby_cute_easter_blue.png';
         //'http://sweetclipart.com/multisite/sweetclipart/files/bird_blue_cute.png';
@@ -284,7 +341,9 @@ function Bird(canvas, ctx) {
         img.onload = function() {
             console.log("loaded birb");
             that.img = img;
-            that.draw();
+            //that.draw();
+            that.img.onload  = null;
+            resolve(true);
         };
         img.src = url;
         return img;
