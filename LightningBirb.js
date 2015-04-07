@@ -18,23 +18,35 @@
 //            - Moves faster?
 //            - overlapping time?
 //                - So you can't jsut move to the top and be safe
+//    - Code
+//         - requestanimationframe // Make things smoother
+//                - Will also require reworking lightning
 
 
 window.onload = runIt;
 
 function runIt() {
     var canvas = document.getElementById('can');
-    var world = new World(canvas);
-    
+    var ctx = canvas.getContext('2d');
+    var world = new World(canvas, ctx);
+
+    // Remove css
+    canvas.className = '';
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Remove listeners
+    canvas.removeEventListener('mousedown', runIt);
+
+    // Run IT!
     world.init();
     world.run();
 }
 
 // WORLD
 ///////////////////////////////////
-function World(canvas) {
+function World(canvas, ctx) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = ctx;
     this.ticker = null;
     this.lightningBoundsWidth = 150;
     this.lightning = null;
@@ -51,6 +63,7 @@ function World(canvas) {
     this.init = function init() {
         this.bird = new Bird(this.canvas, this.ctx);
         this.bird.init();
+
         document.addEventListener('keyup', this.checkKeys);
     };
 
@@ -81,7 +94,7 @@ function World(canvas) {
                 // Check chance
                 if (this.lightningChance >= this.lightningThreshold) {
                 //if (rand > this.lightningThreshold) {
-                    this.lightning = new Lightning(this.canvas, 20, this.getStartX(), 150);
+                    this.lightning = new Lightning(this.canvas, 20, this.getStartX(), this.lightningBoundsWidth);
                     this.flash(this.ctx, this.canvas);
                 }
             }
@@ -105,9 +118,8 @@ function World(canvas) {
         // Draw replay
         drawReplay(this.ctx, this.canvas);
         // Add listeners to replay
-        this.canvas.onmousedown = function() {
-            runIt();
-        };
+        this.canvas.className += "over";
+        this.canvas.addEventListener('mousedown', runIt);
     };
 
     function writeGG(ctx, canvas) {
