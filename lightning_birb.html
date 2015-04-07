@@ -4,18 +4,44 @@
     <meta charset="UTF-8">
     <title>Lightning Birb</title>
     <style>
+        header {
+            padding: 25px 0px 45px 0px;
+        }
+        #page-title {
+            color: #f7da36;
+            text-align: center;
+            font-size: 50px;
+            text-decoration: underline;
+            font-family: Arial, sans-serif;
+            margin: 0px;
+        }
+        #container {}
         #can {
             border: 1px solid black;
+            margin: 0px auto;
+            display: block;
         }
         #can.over {
             cursor: pointer;
         }
-
     </style>
 
     <script src="LightningBirb.js"></script>
 </head>
 <body>
-    <canvas id="can" width="500" height="500"></canvas>
+    <header>
+        <h1 id="page-title">Lightning Birb!</h1>
+    </header>
+    <div id="container">
+        <canvas id="can" width="750" height="375"></canvas>
+    </div>
 </body>
 </html>
+
+
+
+
+
+
+
+
