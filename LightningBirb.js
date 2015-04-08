@@ -14,14 +14,14 @@
 //        - End of level splash/animation
 //        - Favicon
 //    - Functionality
-//        - Prevent birb from running off canvas (done)
-//        - Help text (h)
-//        - Pause (p)
+//        - Prevent birb from running off canvas  (done)
+//        - Help text below screenp
+//        - Pause (p)  (done)
 //        - Prevent Birb from overlapping lighting?
 //        - Levels
-//        - Lives (done)
+//        - Lives  (done)
 //        - Better lightning?
-//            - Random chance to change direction? (tried)
+//            - Random chance to change direction?  (tried)
 //            - Moves faster?
 //            - overlapping time?
 //                - So you can't just move to the top and be safe
@@ -90,7 +90,6 @@ function World(canvas, ctx) {
             that.clearWorld();
         });
         addControls();
-        //document.addEventListener('keyup', this.checkKeys);
     };
 
 
@@ -118,6 +117,7 @@ function World(canvas, ctx) {
                     }
                 // Check for lightning and draw it if needed
                 } else if (this.lightning.done) {
+                    this.container.removeChild(this.lightning.canvas);
                     this.lightning = null;
                     this.lightningChance = 0;
                     this.clearWorld();
@@ -131,7 +131,7 @@ function World(canvas, ctx) {
                 // Check chance
                 if (this.lightningChance >= this.lightningThreshold) {
                 //if (rand > this.lightningThreshold) {
-                    this.lightning = new Lightning(this.canvas, 20, this.getStartX(), this.lightningBoundsWidth);
+                    this.lightning = new Lightning(this.canvas, this.container, 20, this.getStartX(), this.lightningBoundsWidth);
                     this.flash(this.ctx, this.canvas);
                 }
             }
@@ -140,11 +140,16 @@ function World(canvas, ctx) {
 
     // Clear World
     this.clearWorld = function clearWorld() {
+        this.ctx.save();
         this.ctx.clearRect(0, 0, this.canvas.width, canvas.height);
+        //ctx.fillStyle = '#000099';
+        //this.ctx.fillRect(0, 0, this.canvas.width, canvas.height);
         //this.ctx.fillRect(0, 0, this.width, this.height);
+        this.ctx.restore();
         this.bird.draw();
         this.drawLives();
         this.drawLevel();
+
     };
 
     this.restart = function reset() {
@@ -154,6 +159,7 @@ function World(canvas, ctx) {
         function restartHelper() {
             that.flashing = false;
             that.ticker = null;
+            that.container.removeChild(that.lightning.canvas);
             that.lightning = null;
             that.lightningChance = 0;
             addControls();
@@ -214,9 +220,7 @@ function World(canvas, ctx) {
     };
 
     // Help
-    this.help = function help() {
-
-    };
+    this.help = function help() {};
 
     //
     // LIVES and LEVEL
@@ -474,12 +478,11 @@ function Bird(canvas, ctx) {
 
 // LIGHTNING
 ///////////////////////////////////
-function Lightning(canvas, baseLen, startX, boundsWidth) {
+function Lightning(canvas, container, baseLen, startX, boundsWidth) {
     // Properties
-    //var baseLen = baseLen;
-    var height = canvas.height;//, width = canvas.width;
-    //var startX = this.getStartX(boundsWidth);
-    this.ctx = canvas.getContext('2d');
+    this.canvas = addCanvas(canvas, container);
+    var height = this.canvas.height;//, width = canvas.width;
+    this.ctx = this.canvas.getContext('2d');
     this.leftBound = startX - boundsWidth/2;
     this.rightBound = startX + boundsWidth/2;
     this.startPosn = [startX, 0];
@@ -491,6 +494,18 @@ function Lightning(canvas, baseLen, startX, boundsWidth) {
     this.count = 0;
     //this.times = 100;
 
+
+    function addCanvas(canvas, container) {
+        var can = document.createElement('canvas');
+        can.className = 'secondary lightning';
+        can.style['left'] = canvas.getBoundingClientRect().left + 'px';
+        can.width = canvas.width;
+        can.height = canvas.height;
+        container.appendChild(can);
+        return can;
+    }
+
+    // Methods
     this.tick = function tick() {
         //console.log("lighting!", this);
         if (this.currPosn[1] >= height) {
