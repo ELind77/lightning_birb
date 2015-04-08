@@ -65,6 +65,7 @@ function World(canvas, ctx) {
     // New lightning roughly every 2.5 seconds (50 ticks)
     this.lightningThreshold = 25;
     this.flashing = false;
+    this.paused = false;
     this.count = 0;
     this.bird = null;
     this.lives = 3;
@@ -80,14 +81,14 @@ function World(canvas, ctx) {
         promise.then(function(resolved) {
             that.clearWorld();
         });
-        //this.clearWorld();
-        document.addEventListener('keyup', this.checkKeys);
+        addControls();
+        //document.addEventListener('keyup', this.checkKeys);
     };
 
     // RUN
     this.run = function run() {
         //var that = this;
-        this.ticker = setInterval(function() {that.tick.call(that);  }, that.tickRate);
+        this.ticker = setInterval(function() {that.tick.call(that);}, that.tickRate);
     };
 
     // TICK
@@ -146,7 +147,8 @@ function World(canvas, ctx) {
             that.ticker = null;
             that.lightning = null;
             that.lightningChance = 0;
-            document.addEventListener('keyup', that.checkKeys);
+            addControls();
+            //document.addEventListener('keyup', that.checkKeys);
             that.clearWorld();
             that.run();
         }
@@ -176,12 +178,40 @@ function World(canvas, ctx) {
         // Draw replay
         drawReplay(this.ctx, this.canvas);
         // Add listeners to replay
-        this.canvas.className += "over";
+        this.canvas.className += "gg";
         this.canvas.addEventListener('mousedown', that.reset);
     };
 
+    this.resume = function resume() {
+        this.paused = false;
+        this.clearWorld();
+        document.removeEventListener('keyup', pauseListener);
+        addControls();
+        this.run();
+    };
+
+    // Pause
+    this.pause = function pause() {
+        if (this.paused) {
+            this.resume();
+        } else {
+            this.paused = true;
+            this.stopEverything();
+            this.ctx.save();
+            this.ctx.globalAlpha = 0.5;
+            this.ctx.fillRect(0, 0, this.width, this.height);
+            this.ctx.restore();
+            document.addEventListener('keyup', pauseListener);
+        }
+    };
+
+    // Help
+    this.help = function help() {
+
+    };
+
     //
-    // LIVES
+    // LIVES and LEVEL
     //
     this.drawLives = function drawLives() {
         var livesSize = 20;
@@ -220,9 +250,9 @@ function World(canvas, ctx) {
         // Stop ticking
         clearInterval(this.ticker);
         // Clear listeners
-        document.removeEventListener('keyup', this.checkKeys);
+        removeControls();
+        //document.removeEventListener('keyup', this.checkKeys);
     };
-
 
     function writeGG(ctx, canvas) {
         ctx.save();
@@ -286,19 +316,46 @@ function World(canvas, ctx) {
         } while (true);
     };
 
-    this.checkKeys = function checkKeys(e) {
+    //
+    // Listeners
+    //
+    function addControls() {
+        document.addEventListener('keyup', checkKeys);
+    }
+
+    function removeControls() {
+        document.removeEventListener('keyup', checkKeys);
+    }
+
+    function pauseListener(e) {
+        if (e.which == 80) {
+            that.pause();
+        }
+    }
+
+    function checkKeys(e) {
         switch(e.which) {
             case 38:
+            case 87:
                 that.bird.move("up");
                 break;
             case 40:
+            case 83:
                 that.bird.move("down");
                 break;
             case 37:
+            case 65:
                 that.bird.move("left");
                 break;
             case 39:
+            case 68:
                 that.bird.move("right");
+                break;
+            case 80: // P
+                that.pause();
+                break;
+            case 72: // H
+                that.help();
                 break;
         }
     }
