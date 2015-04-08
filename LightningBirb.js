@@ -53,19 +53,24 @@ function runIt() {
 // WORLD
 ///////////////////////////////////
 function World(canvas, ctx) {
+    this.container = document.getElementById('container');
+    // Canvas
     this.canvas = canvas;
     this.width = canvas.width;
     this.height = canvas.height;
     this.ctx = ctx;
+    // Ticker
     this.tickRate = 50;
     this.ticker = null;
+    // Lightning
     this.lightningBoundsWidth = 150;
     this.lightning = null;
     this.lightningChance = 0;
-    // New lightning roughly every 2.5 seconds (50 ticks)
-    this.lightningThreshold = 25;
+    this.lightningThreshold = 25; // New lightning roughly every 2.5 seconds (50 ticks)
     this.flashing = false;
+    // Everything Else
     this.paused = false;
+    this.pauser = null;
     this.count = 0;
     this.bird = null;
     this.lives = 3;
@@ -74,6 +79,9 @@ function World(canvas, ctx) {
 
     // INIT
     this.init = function init() {
+        // Pauser
+        this.pauser = makePauser();
+        // Birb
         this.bird = new Bird(this.canvas, this.ctx);
         var promise = new Promise(function(resolve, reject) {
             that.bird.init(resolve, reject);
@@ -84,6 +92,7 @@ function World(canvas, ctx) {
         addControls();
         //document.addEventListener('keyup', this.checkKeys);
     };
+
 
     // RUN
     this.run = function run() {
@@ -184,7 +193,8 @@ function World(canvas, ctx) {
 
     this.resume = function resume() {
         this.paused = false;
-        this.clearWorld();
+        //this.clearWorld();
+        this.container.removeChild(this.pauser);
         document.removeEventListener('keyup', pauseListener);
         addControls();
         this.run();
@@ -196,11 +206,9 @@ function World(canvas, ctx) {
             this.resume();
         } else {
             this.paused = true;
+            this.pauser.style['left'] = that.canvas.getBoundingClientRect().left + 'px';
             this.stopEverything();
-            this.ctx.save();
-            this.ctx.globalAlpha = 0.5;
-            this.ctx.fillRect(0, 0, this.width, this.height);
-            this.ctx.restore();
+            this.container.appendChild(this.pauser);
             document.addEventListener('keyup', pauseListener);
         }
     };
@@ -246,6 +254,28 @@ function World(canvas, ctx) {
     //
     // Helpers
     //
+    function makePauser() {
+        var can = document.createElement('canvas');
+        can.className = 'secondary';
+        can.style['z-index'] = Infinity;
+
+        can.width = that.width;
+        can.height = that.height;
+        var ctx = can.getContext('2d');
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.fillRect(0, 0, can.width, can.height);
+        ctx.fillStyle = 'white';
+        ctx.font = '50pt Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Paused', canvas.width/2, canvas.height/2);
+        ctx.restore();
+
+        return can;
+    }
+
+
+
     this.stopEverything = function stopEverything() {
         // Stop ticking
         clearInterval(this.ticker);
