@@ -88,7 +88,7 @@ function World(canvas, ctx) {
         // Flash
         this.flasher = makeFlash();
         // Birb
-        this.bird = new Bird(this.canvas, this.ctx);
+        this.bird = new Bird(this);
         var promise = new Promise(function(resolve, reject) {
             that.bird.init(resolve, reject);
         });
@@ -431,10 +431,11 @@ function World(canvas, ctx) {
 
 // BIRD
 ///////////////////////////////////
-function Bird(canvas, ctx) {
-    this.canvas = canvas;
-    this.ctx = ctx;
-    this.posn = [canvas.width/2, canvas.height/2];
+function Bird(world) {
+    this.container = world.container;
+    this.canvas = addCanvas(world);
+    this.ctx = this.canvas.getContext('2d');
+    this.posn = [this.canvas.width/2, this.canvas.height/2];
     this.width = 50;
     this.height = 50;
     this.img = null;
@@ -505,6 +506,16 @@ function Bird(canvas, ctx) {
         };
         img.src = url;
         return img;
+    };
+
+    function addCanvas(world) {
+        var can = document.createElement('canvas');
+        can.className = 'secondary bird';
+        can.style['left'] = world.canvas.getBoundingClientRect().left + 'px';
+        can.width = world.canvas.width;
+        can.height = world.canvas.height;
+        world.container.appendChild(can);
+        return can;
     }
 }
 
@@ -527,17 +538,6 @@ function Lightning(canvas, container, baseLen, startX, boundsWidth) {
     this.count = 0;
     //this.times = 100;
 
-
-    function addCanvas(canvas, container) {
-        var can = document.createElement('canvas');
-        can.className = 'secondary lightning';
-        can.style['left'] = canvas.getBoundingClientRect().left + 'px';
-        can.width = canvas.width;
-        can.height = canvas.height;
-        container.appendChild(can);
-        return can;
-    }
-
     // Methods
     this.tick = function tick() {
         //console.log("lighting!", this);
@@ -559,9 +559,6 @@ function Lightning(canvas, container, baseLen, startX, boundsWidth) {
         }
     };
 
-    //
-    // Helpers
-    //
     this.getNewPosn = function getNewPosn(currPosn) {
         var rand = Math.random();
         //// Update chance
@@ -577,6 +574,19 @@ function Lightning(canvas, container, baseLen, startX, boundsWidth) {
         var newY = currPosn[1] + newLen * Math.sin(this.theta);
         return [newX, newY];
     };
+
+    //
+    // Helpers
+    //
+    function addCanvas(canvas, container) {
+        var can = document.createElement('canvas');
+        can.className = 'secondary lightning';
+        can.style['left'] = canvas.getBoundingClientRect().left + 'px';
+        can.width = canvas.width;
+        can.height = canvas.height;
+        container.appendChild(can);
+        return can;
+    }
 
     function drawLine(ctx, posn1, posn2) {
         ctx.save();
