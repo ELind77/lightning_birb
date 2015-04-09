@@ -67,6 +67,7 @@ function World(canvas, ctx) {
     this.lightning = null;
     this.lightningChance = 0;
     this.lightningThreshold = 25; // New lightning roughly every 2.5 seconds (50 ticks)
+    this.flasher = null;
     this.flashing = false;
     // Everything Else
     this.paused = false;
@@ -84,6 +85,8 @@ function World(canvas, ctx) {
         this.pauser = makePauser();
         // GG
         this.gg = makeGG();
+        // Flash
+        this.flasher = makeFlash();
         // Birb
         this.bird = new Bird(this.canvas, this.ctx);
         var promise = new Promise(function(resolve, reject) {
@@ -135,7 +138,7 @@ function World(canvas, ctx) {
                 if (this.lightningChance >= this.lightningThreshold) {
                 //if (rand > this.lightningThreshold) {
                     this.lightning = new Lightning(this.canvas, this.container, 20, this.getStartX(), this.lightningBoundsWidth);
-                    this.flash(this.ctx, this.canvas);
+                    this.flash();
                 }
             }
         }
@@ -189,6 +192,19 @@ function World(canvas, ctx) {
         that.restart();
     };
 
+    // Flash
+    this.flash = function flash() {
+        if (this.flashing) {
+            this.flashing = null;
+            this.container.removeChild(this.flasher);
+            //this.clearWorld();
+        } else {
+            this.flashing = true;
+            this.flasher.style['left'] = this.canvas.getBoundingClientRect().left + 'px';
+            this.container.appendChild(this.flasher);
+        }
+    };
+
     // GG
     this.gameOver = function gameOver() {
         // Remove Listeners and ticker
@@ -207,8 +223,8 @@ function World(canvas, ctx) {
         } else {
             this.paused = true;
             this.pauser.style['left'] = that.canvas.getBoundingClientRect().left + 'px';
-            this.stopEverything();
             this.container.appendChild(this.pauser);
+            this.stopEverything();
             document.addEventListener('keyup', pauseListener);
         }
     };
@@ -257,6 +273,7 @@ function World(canvas, ctx) {
         this.ctx.restore();
     };
 
+    // Stop Everything
     this.stopEverything = function stopEverything() {
         // Stop ticking
         clearInterval(this.ticker);
@@ -293,7 +310,6 @@ function World(canvas, ctx) {
         can.id = "gg";
         can.className = 'secondary';
         can.style['z-index'] = Infinity;
-
         can.width = that.width;
         can.height = that.height;
         var ctx = can.getContext('2d');
@@ -340,18 +356,21 @@ function World(canvas, ctx) {
         //ctx.restore();
     }
 
-    this.flash = function flash(ctx, canvas) {
-        if (this.flashing) {
-            this.flashing = null;
-            this.clearWorld();
-        } else {
-            this.flashing = true;
-            ctx.save();
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.restore();
-        }
-    };
+    function makeFlash() {
+        var can = document.createElement('canvas');
+        var ctx = can.getContext('2d');
+        can.id = "flash";
+        can.className = 'secondary';
+        can.style['z-index'] = Infinity;
+        can.width = that.width;
+        can.height = that.height;
+        ctx.save();
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, can.width, can.height);
+        ctx.restore();
+
+        return can;
+    }
 
     this.getStartX = function getStartX() {
         var rand, x;
