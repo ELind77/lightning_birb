@@ -71,6 +71,7 @@ function World(canvas, ctx) {
     // Everything Else
     this.paused = false;
     this.pauser = null;
+    this.gg = null;
     this.count = 0;
     this.bird = null;
     this.lives = 3;
@@ -81,6 +82,8 @@ function World(canvas, ctx) {
     this.init = function init() {
         // Pauser
         this.pauser = makePauser();
+        // GG
+        this.gg = makeGG();
         // Birb
         this.bird = new Bird(this.canvas, this.ctx);
         var promise = new Promise(function(resolve, reject) {
@@ -163,13 +166,14 @@ function World(canvas, ctx) {
             that.lightning = null;
             that.lightningChance = 0;
             addControls();
-            //document.addEventListener('keyup', that.checkKeys);
             that.clearWorld();
             that.run();
         }
         setTimeout(restartHelper, 500);
     };
 
+    // Resets the world to it's initial state
+    // Primarily called after GameOver
     this.reset = function reset() {
         // Reset game persistent world properties
         that.lives = 3;
@@ -177,33 +181,23 @@ function World(canvas, ctx) {
         // Remove css
         that.canvas.className = '';
         // Clear the canvas
-        that.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        that.container.removeChild(that.gg);
+        //that.ctx.clearRect(0, 0, canvas.width, canvas.height);
         // Remove listeners
-        that.canvas.removeEventListener('mousedown', that.reset);
+        that.gg.removeEventListener('mousedown', that.reset);
         // Play again
         that.restart();
     };
 
     // GG
     this.gameOver = function gameOver() {
-        // Remove Liseners and ticker
+        // Remove Listeners and ticker
         this.stopEverything();
         // Show game over
-        writeGG(this.ctx, this.canvas);
-        // Draw replay
-        drawReplay(this.ctx, this.canvas);
-        // Add listeners to replay
-        this.canvas.className += "gg";
-        this.canvas.addEventListener('mousedown', that.reset);
-    };
-
-    this.resume = function resume() {
-        this.paused = false;
-        //this.clearWorld();
-        this.container.removeChild(this.pauser);
-        document.removeEventListener('keyup', pauseListener);
-        addControls();
-        this.run();
+        this.gg.style['left'] = that.canvas.getBoundingClientRect().left + 'px';
+        this.container.appendChild(this.gg);
+        // Add listener to replay
+        this.gg.addEventListener('mousedown', that.reset);
     };
 
     // Pause
@@ -217,6 +211,15 @@ function World(canvas, ctx) {
             this.container.appendChild(this.pauser);
             document.addEventListener('keyup', pauseListener);
         }
+    };
+
+    this.resume = function resume() {
+        this.paused = false;
+        //this.clearWorld();
+        this.container.removeChild(this.pauser);
+        document.removeEventListener('keyup', pauseListener);
+        addControls();
+        this.run();
     };
 
     // Help
@@ -254,6 +257,14 @@ function World(canvas, ctx) {
         this.ctx.restore();
     };
 
+    this.stopEverything = function stopEverything() {
+        // Stop ticking
+        clearInterval(this.ticker);
+        // Clear listeners
+        removeControls();
+        //document.removeEventListener('keyup', this.checkKeys);
+    };
+
 
     //
     // Helpers
@@ -274,19 +285,22 @@ function World(canvas, ctx) {
         ctx.textAlign = 'center';
         ctx.fillText('Paused', canvas.width/2, canvas.height/2);
         ctx.restore();
-
         return can;
     }
 
+    function makeGG() {
+        var can = document.createElement('canvas');
+        can.id = "gg";
+        can.className = 'secondary';
+        can.style['z-index'] = Infinity;
 
-
-    this.stopEverything = function stopEverything() {
-        // Stop ticking
-        clearInterval(this.ticker);
-        // Clear listeners
-        removeControls();
-        //document.removeEventListener('keyup', this.checkKeys);
-    };
+        can.width = that.width;
+        can.height = that.height;
+        var ctx = can.getContext('2d');
+        writeGG(ctx, can);
+        drawReplay(ctx, can);
+        return can;
+    }
 
     function writeGG(ctx, canvas) {
         ctx.save();
