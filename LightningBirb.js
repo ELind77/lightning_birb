@@ -288,9 +288,7 @@ function World(canvas, ctx) {
     //
     function makePauser() {
         var can = document.createElement('canvas');
-        can.className = 'secondary';
-        can.style['z-index'] = 1000;
-
+        can.className = 'secondary overlay';
         can.width = that.width;
         can.height = that.height;
         var ctx = can.getContext('2d');
@@ -308,8 +306,8 @@ function World(canvas, ctx) {
     function makeGG() {
         var can = document.createElement('canvas');
         can.id = "gg";
-        can.className = 'secondary';
-        can.style['z-index'] = 1000;
+        can.className = 'secondary overlay';
+        //can.style['z-index'] = 1000;
         can.width = that.width;
         can.height = that.height;
         var ctx = can.getContext('2d');
@@ -360,8 +358,8 @@ function World(canvas, ctx) {
         var can = document.createElement('canvas');
         var ctx = can.getContext('2d');
         can.id = "flash";
-        can.className = 'secondary';
-        can.style['z-index'] = 1000;
+        can.className = 'secondary overlay';
+        //can.style['z-index'] = 1000;
         can.width = that.width;
         can.height = that.height;
         ctx.save();
