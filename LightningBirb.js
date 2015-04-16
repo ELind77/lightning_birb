@@ -6,8 +6,8 @@
 // TODO:
 //    - Assets
 //        - Birb asset
-//        - Background
-//            - Clouds
+//        - Background (done)
+//            - Clouds (done)
 //        - Better fonts?
 //        - Game Over Screen
 //        - Loading Splash
@@ -15,7 +15,7 @@
 //        - Favicon
 //    - Functionality
 //        - Prevent birb from running off canvas  (done)
-//        - Help text below screenp
+//        - Help text below screen
 //        - Pause (p)  (done)
 //        - Prevent Birb from overlapping lighting?
 //        - Levels
@@ -492,7 +492,7 @@ function Bird(world) {
     //
     this.loadSprite = function loadSprite(resolve, reject) {
         var that = this;
-        var url = 'http://sweetclipart.com/multisite/sweetclipart/files/imagecache/middle/chick_baby_cute_easter_blue.png';
+        //var url = 'http://sweetclipart.com/multisite/sweetclipart/files/imagecache/middle/chick_baby_cute_easter_blue.png';
         //'http://sweetclipart.com/multisite/sweetclipart/files/bird_blue_cute.png';
         var img = new Image();
         img.onload = function() {
@@ -502,7 +502,7 @@ function Bird(world) {
             that.img.onload  = null;
             resolve(true);
         };
-        img.src = url;
+        img.src = "assets/birb.png";
         return img;
     };
 
